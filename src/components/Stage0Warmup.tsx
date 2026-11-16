@@ -101,7 +101,7 @@ export const Stage0Warmup: React.FC = () => {
       <div className="bg-white rounded-2xl p-4 shadow-sm border border-indigo-100 flex flex-wrap items-center justify-between gap-3">
         <div>
           <h2 className="text-lg sm:text-xl font-black text-indigo-800">
-            🔥 5 分鐘通分暖身：複習用「通分」比較分數大小
+            🔥 通分暖身：複習用「通分」比較分數大小
           </h2>
           <p className="text-xs sm:text-sm text-slate-600">
             先複習上一節的通分步驟：<b>找公倍數 ➔ 擴分成同分母 ➔ 比較分子大小</b>！

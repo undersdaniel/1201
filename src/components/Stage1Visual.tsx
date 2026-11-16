@@ -356,7 +356,7 @@ export const Stage1Visual: React.FC = () => {
       const smallSide = lVal < 0.5 ? `${leftNum}/${leftDen}` : `${rightNum}/${rightDen}`;
       return `【策略3：看有沒有超過一半】${bigSide} 超過一半（1/2），而 ${smallSide} 不到一半，不用通分就知道 ${bigSide} 比較大！`;
     }
-    return '觀察看看圓餅或長條的塗色面積，也可以勾選上方的「顯示 1/2 基準線」或「高亮距離 1 的差距」來幫忙判斷喔！';
+    return '觀察看看圓餅或長條的塗色面積，也可以勾選上方的「顯示 1/2 基準線」或「顯示距離 1 的差距」來幫忙判斷喔！';
   };
 
   return (
@@ -455,7 +455,7 @@ export const Stage1Visual: React.FC = () => {
               onChange={(e) => setShowGapHighlight(e.target.checked)}
               className="w-4 h-4 accent-rose-500 rounded"
             />
-            <span>🧩 高亮「距離 1 的差距」</span>
+            <span>🧩 顯示「距離 1 的差距」</span>
           </label>
           <label className="inline-flex items-center gap-1.5 cursor-pointer">
             <input
