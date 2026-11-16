@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 
-interface IslandNode {
+interface MazeNode {
   id: string;
   label?: string;
   n?: number;
@@ -12,7 +12,7 @@ interface IslandNode {
   exit?: string;
 }
 
-const ISLAND_NODES: Record<string, IslandNode> = {
+const MAZE_NODES: Record<string, MazeNode> = {
   start: { id: 'start', label: '起點', x: 95, y: 165, next: ['n_7_16', 'n_6_11'] },
   n_7_16: { id: 'n_7_16', n: 7, d: 16, val: 7 / 16, x: 245, y: 100, next: ['n_5_12', 'n_4_7'] },
   n_6_11: { id: 'n_6_11', n: 6, d: 11, val: 6 / 11, x: 245, y: 230, next: ['n_7_9', 'n_9_11'] },
@@ -26,7 +26,7 @@ const ISLAND_NODES: Record<string, IslandNode> = {
   n_13_11: { id: 'n_13_11', n: 13, d: 11, val: 13 / 11, x: 545, y: 275, exit: 'D' },
 };
 
-const ISLAND_EXITS = [
+const MAZE_EXITS = [
   { id: 'A', label: '出口 A', x: 675, y: 55 },
   { id: 'B', label: '出口 B', x: 675, y: 128 },
   { id: 'C', label: '出口 C', x: 675, y: 202 },
@@ -35,24 +35,24 @@ const ISLAND_EXITS = [
 
 const MAZE_STEP_HINTS: Record<string, { prompt: string; wrongTip: string; rightTip: string }> = {
   start: {
-    prompt: '第 1 站（起點分岔）：請比較 7/16 和 6/11，點擊比較大的分數航行！',
+    prompt: '第 1 站（起點分岔）：請比較 7/16 和 6/11，點擊比較大的分數開車前進！',
     wrongTip:
-      '🚧 觸礁提示：用「看有沒有超過一半」想想看！16 的一半是 8（7/16 不到一半），11 的一半是 5.5（6/11 超過一半）喔！',
-    rightTip: '✅ 航行正確！6/11 超過一半（5.5/11），7/16 不到一半（8/16），所以 6/11 > 7/16！',
+      '🚧 路障提示：用「看有沒有超過一半」想想看！16 的一半是 8（7/16 不到一半），11 的一半是 5.5（6/11 超過一半）喔！',
+    rightTip: '✅ 行駛正確！6/11 超過一半（5.5/11），7/16 不到一半（8/16），所以 6/11 > 7/16！',
   },
   n_6_11: {
-    prompt: '第 2 站（從 6/11 分岔）：請比較 7/9 和 9/11，點擊比較大的分數航行！',
+    prompt: '第 2 站（從 6/11 分岔）：請比較 7/9 和 9/11，點擊比較大的分數開車前進！',
     wrongTip:
-      '🚧 觸礁提示：這兩個分數分子都比分母少 2！7/9 距離 1 差 2/9，9/11 距離 1 差 2/11，缺得越少越大喔！',
+      '🚧 路障提示：這兩個分數分子都比分母少 2！7/9 距離 1 差 2/9，9/11 距離 1 差 2/11，缺得越少越大喔！',
     rightTip:
-      '✅ 航行正確！9/11 距離 1 只差 2/11，7/9 距離 1 差 2/9，缺得比較少，所以 9/11 > 7/9！',
+      '✅ 行駛正確！9/11 距離 1 只差 2/11，7/9 距離 1 差 2/9，缺得比較少，所以 9/11 > 7/9！',
   },
   n_9_11: {
     prompt: '第 3 站（終極考驗）：請比較 15/13 和 13/11，點擊比較大的分數就能抵達出口！',
     wrongTip:
-      '🚧 觸礁提示：把假分數換成帶分數比比看！15/13 = 1又2/13，13/11 = 1又2/11，哪一個的分數部分比較大呢？',
+      '🚧 路障提示：把假分數換成帶分數比比看！15/13 = 1又2/13，13/11 = 1又2/11，哪一個的分數部分比較大呢？',
     rightTip:
-      '🎉 太厲害了！13/11 = 1又2/11，15/13 = 1又2/13，同分子比較 2/11 > 2/13，成功抵達【出口 D】！',
+      '🎉 太厲害了！13/11 = 1又2/11，15/13 = 1又2/13，同分子比較 2/11 > 2/13，成功開到【出口 D】！',
   },
 };
 
@@ -68,28 +68,28 @@ export const Stage4Maze: React.FC = () => {
   };
 
   const currentId = pathHistory[pathHistory.length - 1];
-  const currentNode = ISLAND_NODES[currentId];
+  const currentNode = MAZE_NODES[currentId];
   const candidateIds = !finished && currentNode.next ? currentNode.next : [];
   const stepCount = pathHistory.length - 1;
 
   const instructionText =
     finished && currentNode.exit
-      ? `🏆 航行成功！沿著較大的分數走，最後到達【出口 ${currentNode.exit}】！`
+      ? `🏆 闖關成功！沿著較大的分數行駛，最後到達【出口 ${currentNode.exit}】！`
       : MAZE_STEP_HINTS[currentId]?.prompt || '';
 
-  const selectIslandNode = (targetId: string) => {
+  const selectMazeNode = (targetId: string) => {
     if (finished || !currentNode?.next || !currentNode.next.includes(targetId)) return;
 
     const [opt1Id, opt2Id] = currentNode.next;
-    const opt1 = ISLAND_NODES[opt1Id];
-    const opt2 = ISLAND_NODES[opt2Id];
+    const opt1 = MAZE_NODES[opt1Id];
+    const opt2 = MAZE_NODES[opt2Id];
     const largerId = (opt1.val || 0) > (opt2.val || 0) ? opt1Id : opt2Id;
     const stepInfo = MAZE_STEP_HINTS[currentId];
 
     if (targetId === largerId) {
       setPathHistory((prev) => [...prev, targetId]);
       setFeedback({ type: 'success', msg: stepInfo.rightTip });
-      if (ISLAND_NODES[targetId].exit) {
+      if (MAZE_NODES[targetId].exit) {
         setFinished(true);
       }
     } else {
@@ -102,11 +102,11 @@ export const Stage4Maze: React.FC = () => {
       <div className="bg-white rounded-2xl p-4 shadow-sm border border-indigo-100 flex flex-wrap items-center justify-between gap-3">
         <div>
           <h2 className="text-lg sm:text-xl font-black text-indigo-800">
-            ⛵ 海島航線大挑戰（進階版）：沿著「分數比較大」的路線走！
+            🚗 公路冒險大挑戰（進階版）：沿著「分數比較大」的路線開！
           </h2>
           <p className="text-xs sm:text-sm text-slate-600">
             挑戰升級！請綜合運用「看有沒有超過一半」、「跟 1 比差距（差 2 份）」與「換成帶分數」，點擊
-            <b>比較大</b>的分數前進！
+            <b>比較大</b>的分數開車前進！
           </p>
         </div>
         <div className="flex items-center gap-3">
@@ -115,79 +115,104 @@ export const Stage4Maze: React.FC = () => {
             onClick={initMazeGame}
             className="bg-slate-200 hover:bg-slate-300 active:scale-95 text-slate-800 font-bold px-3.5 py-2 rounded-xl text-sm cursor-pointer"
           >
-            🔄 重新航行
+            🔄 重新出發
           </button>
         </div>
       </div>
 
-      <div className="bg-white rounded-3xl p-3 sm:p-5 shadow-lg border-2 border-sky-200 space-y-3">
-        <div className="bg-sky-50 border-2 border-sky-300 rounded-2xl p-3 sm:p-3.5 flex flex-wrap items-center justify-between gap-2">
-          <div className="flex items-center gap-2 font-black text-sky-900 text-sm sm:text-base">
-            <span className="text-xl">🧭</span>
+      <div className="bg-white rounded-3xl p-3 sm:p-5 shadow-lg border-2 border-emerald-200 space-y-3">
+        <div className="bg-emerald-50 border-2 border-emerald-300 rounded-2xl p-3 sm:p-3.5 flex flex-wrap items-center justify-between gap-2">
+          <div className="flex items-center gap-2 font-black text-emerald-900 text-sm sm:text-base">
+            <span className="text-xl">🛣️</span>
             <span>{instructionText}</span>
           </div>
-          <span className="bg-sky-600 text-white text-xs font-black px-3 py-1 rounded-full">
+          <span className="bg-emerald-600 text-white text-xs font-black px-3 py-1 rounded-full">
             進度：{stepCount} / 3 步
           </span>
         </div>
 
-        {/* 互動海洋路線 SVG */}
+        {/* 互動草原公路路線 SVG */}
         <div className="w-full overflow-x-auto">
           <div className="min-w-[680px] max-w-4xl mx-auto">
             <svg
               viewBox="0 0 750 330"
-              className="w-full h-auto rounded-2xl shadow-inner border border-sky-200 bg-[#dff2fe]"
+              className="w-full h-auto rounded-2xl shadow-inner border border-emerald-200 bg-[#ecfdf5]"
             >
+              {/* 翠綠草地與山坡裝飾 */}
               <path
-                d="M 30 30 Q 180 5 380 20 T 720 35 L 735 295 Q 520 325 320 305 T 25 290 Z"
-                fill="#cbeafe"
-                opacity="0.7"
+                d="M 25 25 Q 190 8 380 22 T 725 32 L 732 298 Q 520 320 320 302 T 22 290 Z"
+                fill="#d1fae5"
+                opacity="0.75"
               />
-              <text x="150" y="275" fill="#7dd3fc" fontSize="16">
-                🐟 🐠
+              <text x="125" y="278" fontSize="20">
+                🌲 🌳
               </text>
-              <text x="640" y="175" fill="#7dd3fc" fontSize="16">
-                🐟
+              <text x="150" y="65" fontSize="18">
+                🌻 🌲
+              </text>
+              <text x="625" y="172" fontSize="18">
+                🌳 🌼
               </text>
 
-              {/* 航道底線 */}
-              {Object.values(ISLAND_NODES).map((node) => (
+              {/* 公路柏油路底線 + 中央虛線 */}
+              {Object.values(MAZE_NODES).map((node) => (
                 <g key={`paths-${node.id}`}>
                   {node.next?.map((targetId) => {
-                    const target = ISLAND_NODES[targetId];
+                    const target = MAZE_NODES[targetId];
                     return (
-                      <line
-                        key={`${node.id}-${targetId}`}
-                        x1={node.x}
-                        y1={node.y}
-                        x2={target.x}
-                        y2={target.y}
-                        stroke="#ffffff"
-                        strokeWidth="14"
-                        strokeLinecap="round"
-                        opacity="0.9"
-                      />
+                      <g key={`${node.id}-${targetId}`}>
+                        <line
+                          x1={node.x}
+                          y1={node.y}
+                          x2={target.x}
+                          y2={target.y}
+                          stroke="#475569"
+                          strokeWidth="18"
+                          strokeLinecap="round"
+                        />
+                        <line
+                          x1={node.x}
+                          y1={node.y}
+                          x2={target.x}
+                          y2={target.y}
+                          stroke="#f8fafc"
+                          strokeWidth="2"
+                          strokeDasharray="6,6"
+                          opacity="0.75"
+                        />
+                      </g>
                     );
                   })}
                   {node.exit && (
-                    <line
-                      x1={node.x}
-                      y1={node.y}
-                      x2={ISLAND_EXITS.find((e) => e.id === node.exit)!.x}
-                      y2={ISLAND_EXITS.find((e) => e.id === node.exit)!.y}
-                      stroke="#ffffff"
-                      strokeWidth="14"
-                      strokeLinecap="round"
-                      opacity="0.9"
-                    />
+                    <g>
+                      <line
+                        x1={node.x}
+                        y1={node.y}
+                        x2={MAZE_EXITS.find((e) => e.id === node.exit)!.x}
+                        y2={MAZE_EXITS.find((e) => e.id === node.exit)!.y}
+                        stroke="#475569"
+                        strokeWidth="18"
+                        strokeLinecap="round"
+                      />
+                      <line
+                        x1={node.x}
+                        y1={node.y}
+                        x2={MAZE_EXITS.find((e) => e.id === node.exit)!.x}
+                        y2={MAZE_EXITS.find((e) => e.id === node.exit)!.y}
+                        stroke="#f8fafc"
+                        strokeWidth="2"
+                        strokeDasharray="6,6"
+                        opacity="0.75"
+                      />
+                    </g>
                   )}
                 </g>
               ))}
 
-              {/* 已航行黃色路線 */}
+              {/* 已行駛黃色亮起路線 */}
               {pathHistory.slice(0, -1).map((id, idx) => {
-                const n1 = ISLAND_NODES[id];
-                const n2 = ISLAND_NODES[pathHistory[idx + 1]];
+                const n1 = MAZE_NODES[id];
+                const n2 = MAZE_NODES[pathHistory[idx + 1]];
                 return (
                   <line
                     key={`visited-${id}-${n2.id}`}
@@ -205,8 +230,8 @@ export const Stage4Maze: React.FC = () => {
                 <line
                   x1={currentNode.x}
                   y1={currentNode.y}
-                  x2={ISLAND_EXITS.find((e) => e.id === currentNode.exit)!.x}
-                  y2={ISLAND_EXITS.find((e) => e.id === currentNode.exit)!.y}
+                  x2={MAZE_EXITS.find((e) => e.id === currentNode.exit)!.x}
+                  y2={MAZE_EXITS.find((e) => e.id === currentNode.exit)!.y}
                   stroke="#f59e0b"
                   strokeWidth="8"
                   strokeLinecap="round"
@@ -214,7 +239,7 @@ export const Stage4Maze: React.FC = () => {
               )}
 
               {/* 四個出口標籤 */}
-              {ISLAND_EXITS.map((ex) => {
+              {MAZE_EXITS.map((ex) => {
                 const isReached = finished && currentNode.exit === ex.id;
                 return (
                   <g key={ex.id} transform={`translate(${ex.x - 48}, ${ex.y - 18})`}>
@@ -258,14 +283,14 @@ export const Stage4Maze: React.FC = () => {
                 );
               })}
 
-              {/* 節點圓圈 */}
-              {Object.values(ISLAND_NODES).map((node) => {
+              {/* 節點路標圓圈 */}
+              {Object.values(MAZE_NODES).map((node) => {
                 if (node.id === 'start') return null;
                 const isCandidate = candidateIds.includes(node.id);
                 const isVisited = pathHistory.includes(node.id);
 
                 let circleFill = '#ffffff';
-                let circleStroke = '#38bdf8';
+                let circleStroke = '#10b981';
                 let strokeW = 2.5;
                 if (isCandidate) {
                   circleFill = '#fffbeb';
@@ -280,7 +305,7 @@ export const Stage4Maze: React.FC = () => {
                 return (
                   <g
                     key={node.id}
-                    onClick={isCandidate ? () => selectIslandNode(node.id) : undefined}
+                    onClick={isCandidate ? () => selectMazeNode(node.id) : undefined}
                     className={isCandidate ? 'cursor-pointer hover:opacity-90' : 'cursor-default'}
                   >
                     {isCandidate && (
@@ -334,51 +359,55 @@ export const Stage4Maze: React.FC = () => {
                 );
               })}
 
-              {/* 航行小船 */}
+              {/* 行駛小汽車 */}
               <g
-                transform={`translate(${currentNode.x - 46}, ${currentNode.y - 22})`}
+                transform={`translate(${currentNode.x - 46}, ${currentNode.y - 24})`}
                 style={{ transition: 'all 0.5s ease' }}
               >
-                <polygon
-                  points="8,24 84,24 74,40 18,40"
-                  fill="#a3e635"
-                  stroke="#4d7c0f"
+                {/* 車頂與車窗 */}
+                <path
+                  d="M 22 18 L 32 6 L 60 6 L 70 18 Z"
+                  fill="#ef4444"
+                  stroke="#991b1b"
                   strokeWidth="2"
                 />
+                <path d="M 34 9 L 45 9 L 45 17 L 26 17 Z" fill="#dbeafe" />
+                <path d="M 48 9 L 58 9 L 65 17 L 48 17 Z" fill="#dbeafe" />
+                {/* 車身 */}
                 <rect
-                  x="26"
-                  y="10"
-                  width="28"
-                  height="14"
-                  rx="3"
-                  fill="#fef08a"
-                  stroke="#ca8a04"
-                  strokeWidth="1.5"
+                  x="10"
+                  y="17"
+                  width="72"
+                  height="18"
+                  rx="7"
+                  fill="#f97316"
+                  stroke="#9a3412"
+                  strokeWidth="2"
                 />
-                <circle
-                  cx="62"
-                  cy="14"
-                  r="8"
-                  fill="#38bdf8"
-                  stroke="#0369a1"
-                  strokeWidth="1.5"
-                />
+                {/* 車燈 */}
+                <circle cx="78" cy="24" r="3" fill="#fef08a" />
+                {/* 輪胎 */}
+                <circle cx="27" cy="36" r="7" fill="#1e293b" stroke="#0f172a" strokeWidth="1.5" />
+                <circle cx="27" cy="36" r="3" fill="#cbd5e1" />
+                <circle cx="65" cy="36" r="7" fill="#1e293b" stroke="#0f172a" strokeWidth="1.5" />
+                <circle cx="65" cy="36" r="3" fill="#cbd5e1" />
+                {/* 車身文字提示 */}
                 <text
                   x="46"
-                  y="36"
+                  y="29"
                   textAnchor="middle"
-                  fill="#1a2e05"
-                  fontSize="12"
+                  fill="#ffffff"
+                  fontSize="10"
                   fontWeight="900"
                 >
-                  {currentNode.id === 'start' ? '起點 ➔' : '⛵'}
+                  {currentNode.id === 'start' ? '起點 ➔' : '🚗'}
                 </text>
               </g>
             </svg>
           </div>
         </div>
 
-        {/* 觸礁警告或通關祝賀區 */}
+        {/* 路障警告或通關祝賀區 */}
         {feedback && (
           <div
             className={`rounded-2xl p-4 border-2 text-sm sm:text-base font-bold transition-all ${
