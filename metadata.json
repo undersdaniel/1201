@@ -1,0 +1,6 @@
+{
+  "name": "聰明算！分數比大小互動網",
+  "description": "五年級數學互動學習網站：複習通分並透過圖形探究、策略分類、排排站、海島迷宮與課後測驗，學會不用通分比較異分母分數的大小。",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
