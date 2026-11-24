@@ -1,0 +1,102 @@
+{
+  "entities": {
+    "StudentProgress": {
+      "title": "StudentProgress",
+      "description": "Tracks a student's learning progress and quiz results across all stages by seat number.",
+      "type": "object",
+      "properties": {
+        "seatNumber": {
+          "type": "string",
+          "description": "Student seat number (1-999).",
+          "minLength": 1,
+          "maxLength": 3,
+          "pattern": "^[1-9][0-9]{0,2}$"
+        },
+        "warmupCompleted": {
+          "type": "array",
+          "description": "List of completed warmup problem indices (0-2)."
+        },
+        "visualPresetsExplored": {
+          "type": "array",
+          "description": "List of explored visual preset keys (ex1-ex5)."
+        },
+        "elfBlankSolved": {
+          "type": "boolean",
+          "description": "Whether the student solved the Stage 1 discovery blank."
+        },
+        "sortCompleted": {
+          "type": "integer",
+          "description": "Highest number of cards sorted in Stage 2 (0-12)."
+        },
+        "rankCompletedModes": {
+          "type": "array",
+          "description": "Completed Stage 3 ranking modes (basic, challenge, random)."
+        },
+        "mazeCompleted": {
+          "type": "boolean",
+          "description": "Whether the student completed the Stage 4 basketball shooting challenge."
+        },
+        "pairDiscussionCount": {
+          "type": "integer",
+          "description": "Number of completed Stage 5 pair discussion tasks (0-3)."
+        },
+        "pairPartnerSeat": {
+          "type": "string",
+          "description": "Seat number of the pair discussion partner (empty or 1-999).",
+          "minLength": 0,
+          "maxLength": 3,
+          "pattern": "^([1-9][0-9]{0,2})?$"
+        },
+        "quizSubmitted": {
+          "type": "boolean",
+          "description": "Whether the student has submitted the Stage 6 quiz."
+        },
+        "quizScore": {
+          "type": "integer",
+          "description": "Score on the Stage 6 quiz (0-100)."
+        },
+        "quizCorrectCount": {
+          "type": "integer",
+          "description": "Number of correct answers on the Stage 6 quiz (0-10)."
+        },
+        "lastStage": {
+          "type": "integer",
+          "description": "Last stage tab index visited (0-6)."
+        },
+        "createdAt": {
+          "type": "string",
+          "format": "date-time",
+          "description": "Server timestamp when the student record was created."
+        },
+        "updatedAt": {
+          "type": "string",
+          "format": "date-time",
+          "description": "Server timestamp when the student record was last updated."
+        }
+      },
+      "required": [
+        "seatNumber",
+        "warmupCompleted",
+        "visualPresetsExplored",
+        "elfBlankSolved",
+        "sortCompleted",
+        "rankCompletedModes",
+        "mazeCompleted",
+        "quizSubmitted",
+        "quizScore",
+        "quizCorrectCount",
+        "lastStage",
+        "createdAt",
+        "updatedAt"
+      ]
+    }
+  },
+  "firestore": {
+    "/studentProgress/{seatId}": {
+      "schema": {
+        "$ref": "#/entities/StudentProgress"
+      },
+      "description": "Stores each student's progress indexed by their seat number."
+    }
+  }
+}

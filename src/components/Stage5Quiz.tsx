@@ -140,7 +140,11 @@ const PART_3_QUESTIONS: SymbolQuestion[] = [
   },
 ];
 
-export const Stage5Quiz: React.FC = () => {
+interface Stage5QuizProps {
+  onQuizSubmit?: (score: number, correctCount: number) => void;
+}
+
+export const Stage5Quiz: React.FC<Stage5QuizProps> = ({ onQuizSubmit }) => {
   const [answers, setAnswers] = useState<Record<string, string>>({});
   const [submitted, setSubmitted] = useState(false);
   const [incompleteWarning, setIncompleteWarning] = useState<string | null>(null);
@@ -163,6 +167,9 @@ export const Stage5Quiz: React.FC = () => {
     }
     setIncompleteWarning(null);
     setSubmitted(true);
+    const finalCorrect = allQuestions.filter((q) => answers[q.id] === q.answer).length;
+    const finalScore = finalCorrect * 10;
+    onQuizSubmit?.(finalScore, finalCorrect);
   };
 
   const handleReset = () => {

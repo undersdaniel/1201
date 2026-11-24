@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { FractionDisplay } from './FractionDisplay';
 
 type ShapeType = 'pie' | 'bar';
@@ -237,7 +237,15 @@ const FormattedFractionHeader: React.FC<{ num: number; den: number; showMixed: b
   return <FractionDisplay num={num} den={den} large />;
 };
 
-export const Stage1Visual: React.FC = () => {
+interface Stage1VisualProps {
+  onPresetExplore?: (presetKey: string) => void;
+  onElfSolved?: () => void;
+}
+
+export const Stage1Visual: React.FC<Stage1VisualProps> = ({
+  onPresetExplore,
+  onElfSolved,
+}) => {
   const [leftNum, setLeftNum] = useState(1);
   const [leftDen, setLeftDen] = useState(5);
   const [rightNum, setRightNum] = useState(1);
@@ -252,6 +260,10 @@ export const Stage1Visual: React.FC = () => {
 
   const [elfChoice, setElfChoice] = useState<'大' | '小' | null>(null);
   const [elfShakeCount, setElfShakeCount] = useState(0);
+
+  useEffect(() => {
+    onPresetExplore?.('ex1');
+  }, [onPresetExplore]);
 
   const loadPreset = (
     lNum: number,
@@ -269,6 +281,7 @@ export const Stage1Visual: React.FC = () => {
     setShowMixedFormat(lNum > lDen || rNum > rDen);
     setShowGapHighlight(presetKey === 'ex4');
     setShowHalfLine(presetKey === 'ex5');
+    onPresetExplore?.(presetKey);
   };
 
   const adjustFrac = (side: 'left' | 'right', part: 'num' | 'den', delta: number) => {
@@ -504,7 +517,10 @@ export const Stage1Visual: React.FC = () => {
             </button>
             <button
               type="button"
-              onClick={() => setElfChoice('小')}
+              onClick={() => {
+                setElfChoice('小');
+                onElfSolved?.();
+              }}
               className="bg-white hover:bg-amber-100 border-2 border-amber-400 font-black px-5 py-1.5 rounded-xl text-base cursor-pointer"
             >
               小

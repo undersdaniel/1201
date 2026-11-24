@@ -1,0 +1,116 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    match /{document=**} {
+      allow read, write: if false;
+    }
+
+    function incoming() {
+      return request.resource.data;
+    }
+
+    function existing() {
+      return resource.data;
+    }
+
+    function isValidSeatId(id) {
+      return id is string && id.size() >= 1 && id.size() <= 3 && id.matches('^[1-9][0-9]{0,2}$');
+    }
+
+    function isValidStudentProgress(data) {
+      return data.keys().hasAll([
+          'seatNumber',
+          'warmupCompleted',
+          'visualPresetsExplored',
+          'elfBlankSolved',
+          'sortCompleted',
+          'rankCompletedModes',
+          'mazeCompleted',
+          'quizSubmitted',
+          'quizScore',
+          'quizCorrectCount',
+          'lastStage',
+          'createdAt',
+          'updatedAt'
+        ])
+        && data.keys().hasOnly([
+          'seatNumber',
+          'warmupCompleted',
+          'visualPresetsExplored',
+          'elfBlankSolved',
+          'sortCompleted',
+          'rankCompletedModes',
+          'mazeCompleted',
+          'pairDiscussionCount',
+          'pairPartnerSeat',
+          'quizSubmitted',
+          'quizScore',
+          'quizCorrectCount',
+          'lastStage',
+          'createdAt',
+          'updatedAt'
+        ])
+        && isValidSeatId(data.seatNumber)
+        && data.warmupCompleted is list
+        && data.warmupCompleted.size() <= 3
+        && data.visualPresetsExplored is list
+        && data.visualPresetsExplored.size() <= 5
+        && data.elfBlankSolved is bool
+        && data.sortCompleted is int
+        && data.sortCompleted >= 0
+        && data.sortCompleted <= 12
+        && data.rankCompletedModes is list
+        && data.rankCompletedModes.size() <= 3
+        && data.mazeCompleted is bool
+        && (!('pairDiscussionCount' in data) || (data.pairDiscussionCount is int && data.pairDiscussionCount >= 0 && data.pairDiscussionCount <= 3))
+        && (!('pairPartnerSeat' in data) || (data.pairPartnerSeat is string && data.pairPartnerSeat.size() <= 3 && (data.pairPartnerSeat == '' || data.pairPartnerSeat.matches('^[1-9][0-9]{0,2}$'))))
+        && data.quizSubmitted is bool
+        && data.quizScore is int
+        && data.quizScore >= 0
+        && data.quizScore <= 100
+        && data.quizCorrectCount is int
+        && data.quizCorrectCount >= 0
+        && data.quizCorrectCount <= 10
+        && data.lastStage is int
+        && data.lastStage >= 0
+        && data.lastStage <= 6
+        && data.createdAt is timestamp
+        && data.updatedAt is timestamp;
+    }
+
+    match /test/{docId} {
+      allow get: if docId == 'connection';
+    }
+
+    match /studentProgress/{seatId} {
+      allow get: if isValidSeatId(seatId);
+      allow list: if true;
+      allow create: if isValidSeatId(seatId)
+        && isValidStudentProgress(incoming())
+        && incoming().seatNumber == seatId
+        && incoming().createdAt == request.time
+        && incoming().updatedAt == request.time;
+      allow update: if isValidSeatId(seatId)
+        && isValidStudentProgress(incoming())
+        && incoming().seatNumber == existing().seatNumber
+        && incoming().createdAt == existing().createdAt
+        && incoming().updatedAt == request.time
+        && incoming().diff(existing()).affectedKeys().hasOnly([
+          'warmupCompleted',
+          'visualPresetsExplored',
+          'elfBlankSolved',
+          'sortCompleted',
+          'rankCompletedModes',
+          'mazeCompleted',
+          'pairDiscussionCount',
+          'pairPartnerSeat',
+          'quizSubmitted',
+          'quizScore',
+          'quizCorrectCount',
+          'lastStage',
+          'updatedAt'
+        ]);
+      allow delete: if isValidSeatId(seatId);
+    }
+  }
+}

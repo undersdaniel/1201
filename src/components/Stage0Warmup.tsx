@@ -49,7 +49,15 @@ const WARMUP_PROBLEMS: WarmupProblem[] = [
   },
 ];
 
-export const Stage0Warmup: React.FC = () => {
+interface Stage0WarmupProps {
+  onWarmupComplete?: (problemIdx: number) => void;
+  onGoNextStage?: () => void;
+}
+
+export const Stage0Warmup: React.FC<Stage0WarmupProps> = ({
+  onWarmupComplete,
+  onGoNextStage,
+}) => {
   const [problemIdx, setProblemIdx] = useState(0);
   const [selectedLcd, setSelectedLcd] = useState<number | null>(null);
   const [wrongLcdKey, setWrongLcdKey] = useState<{ val: number; count: number } | null>(null);
@@ -83,7 +91,9 @@ export const Stage0Warmup: React.FC = () => {
 
   const handleCheckSym = (sym: '>' | '<' | '=') => {
     setChosenSym(sym);
-    if (sym !== p.answer) {
+    if (sym === p.answer) {
+      onWarmupComplete?.(problemIdx);
+    } else {
       setSymShakeCount((c) => c + 1);
     }
   };
@@ -283,7 +293,7 @@ export const Stage0Warmup: React.FC = () => {
         {/* 暖身總結回饋 */}
         {chosenSym !== null && (
           <div
-            className={`rounded-2xl p-4 border-2 font-bold text-sm sm:text-base ${
+            className={`rounded-2xl p-4 border-2 font-bold text-sm sm:text-base flex flex-wrap items-center justify-between gap-3 ${
               isSymCorrect
                 ? 'bg-emerald-100 border-emerald-400 text-emerald-950'
                 : 'bg-rose-100 border-rose-400 text-rose-900'
@@ -294,6 +304,28 @@ export const Stage0Warmup: React.FC = () => {
                 ? p.tip
                 : '🤔 分母已經一樣大了，只要比較上面擴分後的「分子」哪個比較大就可以囉！'}
             </span>
+
+            {isSymCorrect && problemIdx < WARMUP_PROBLEMS.length - 1 && (
+              <button
+                type="button"
+                onClick={() => handleLoadProblem(problemIdx + 1)}
+                className="bg-emerald-600 hover:bg-emerald-700 active:scale-95 text-white font-black px-5 py-2 rounded-xl shadow-md flex items-center gap-1.5 transition cursor-pointer shrink-0 animate-pop"
+              >
+                <span>下一題</span>
+                <span>➡️</span>
+              </button>
+            )}
+
+            {isSymCorrect && problemIdx === WARMUP_PROBLEMS.length - 1 && onGoNextStage && (
+              <button
+                type="button"
+                onClick={onGoNextStage}
+                className="bg-indigo-600 hover:bg-indigo-700 active:scale-95 text-white font-black px-5 py-2 rounded-xl shadow-md flex items-center gap-1.5 transition cursor-pointer shrink-0 animate-pop"
+              >
+                <span>前往「1.圖形探究」</span>
+                <span>➡️</span>
+              </button>
+            )}
           </div>
         )}
       </div>

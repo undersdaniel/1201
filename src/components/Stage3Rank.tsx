@@ -69,7 +69,11 @@ function shuffleNotSorted(arr: RankItem[]): RankItem[] {
   return copy;
 }
 
-export const Stage3Rank: React.FC = () => {
+interface Stage3RankProps {
+  onRankComplete?: (mode: RankMode) => void;
+}
+
+export const Stage3Rank: React.FC<Stage3RankProps> = ({ onRankComplete }) => {
   const [mode, setMode] = useState<RankMode>('basic');
   const [items, setItems] = useState<RankItem[]>(() => shuffleNotSorted(RANK_PRESETS.basic));
   const [draggedIdx, setDraggedIdx] = useState<number | null>(null);
@@ -104,6 +108,9 @@ export const Stage3Rank: React.FC = () => {
     const status = items.map((item, idx) => Math.abs(item.val - sortedCorrect[idx].val) < 1e-9);
     setCheckedStatus(status);
     setCheckCount((c) => c + 1);
+    if (status.every(Boolean)) {
+      onRankComplete?.(mode);
+    }
   };
 
   const allCorrect = checkedStatus !== null && checkedStatus.every(Boolean);

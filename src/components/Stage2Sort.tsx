@@ -30,7 +30,11 @@ function shuffleCards(): SortCardItem[] {
   return [...SORT_CARDS_DATA].sort(() => Math.random() - 0.5);
 }
 
-export const Stage2Sort: React.FC = () => {
+interface Stage2SortProps {
+  onSortProgress?: (completedCount: number) => void;
+}
+
+export const Stage2Sort: React.FC<Stage2SortProps> = ({ onSortProgress }) => {
   const [poolCards, setPoolCards] = useState<SortCardItem[]>(() => shuffleCards());
   const [bins, setBins] = useState<Record<1 | 2 | 3, SortCardItem[]>>({ 1: [], 2: [], 3: [] });
   const [selectedCardId, setSelectedCardId] = useState<string | null>(null);
@@ -61,6 +65,7 @@ export const Stage2Sort: React.FC = () => {
       setPoolCards((prev) => prev.filter((c) => c.id !== cardId));
       setBins((prev) => ({ ...prev, [binCat]: [...prev[binCat], cardData] }));
       setSelectedCardId(null);
+      onSortProgress?.(nextCount);
       if (nextCount === SORT_CARDS_DATA.length) {
         setFeedback({
           type: 'success',
