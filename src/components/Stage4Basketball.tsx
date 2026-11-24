@@ -86,64 +86,6 @@ const START_BALL: BallState = { x: 380, y: 312, scale: 1, rotation: 0 };
 const LEFT_HOOP = { x: 195, y: 158 };
 const RIGHT_HOOP = { x: 565, y: 158 };
 
-function playCourtSound(type: 'swish' | 'miss' | 'victory') {
-  try {
-    const AudioCtx =
-      window.AudioContext || (window as unknown as { webkitAudioContext: typeof AudioContext }).webkitAudioContext;
-    if (!AudioCtx) return;
-    const ctx = new AudioCtx();
-    const now = ctx.currentTime;
-
-    if (type === 'swish') {
-      const notes = [523.25, 659.25, 783.99];
-      notes.forEach((freq, i) => {
-        const osc = ctx.createOscillator();
-        const gain = ctx.createGain();
-        osc.type = 'triangle';
-        osc.frequency.setValueAtTime(freq, now + i * 0.065);
-        gain.gain.setValueAtTime(0.14, now + i * 0.065);
-        gain.gain.exponentialRampToValueAtTime(0.001, now + i * 0.065 + 0.22);
-        osc.connect(gain);
-        gain.connect(ctx.destination);
-        osc.start(now + i * 0.065);
-        osc.stop(now + i * 0.065 + 0.24);
-      });
-    } else if (type === 'miss') {
-      const osc = ctx.createOscillator();
-      const gain = ctx.createGain();
-      osc.type = 'sawtooth';
-      osc.frequency.setValueAtTime(210, now);
-      osc.frequency.exponentialRampToValueAtTime(115, now + 0.22);
-      gain.gain.setValueAtTime(0.1, now);
-      gain.gain.exponentialRampToValueAtTime(0.001, now + 0.24);
-      osc.connect(gain);
-      gain.connect(ctx.destination);
-      osc.start(now);
-      osc.stop(now + 0.25);
-    } else {
-      const notes = [523.25, 659.25, 783.99, 1046.5];
-      notes.forEach((freq, i) => {
-        const osc = ctx.createOscillator();
-        const gain = ctx.createGain();
-        osc.type = 'triangle';
-        osc.frequency.setValueAtTime(freq, now + i * 0.09);
-        gain.gain.setValueAtTime(0.16, now + i * 0.09);
-        gain.gain.exponentialRampToValueAtTime(0.001, now + i * 0.09 + 0.35);
-        osc.connect(gain);
-        gain.connect(ctx.destination);
-        osc.start(now + i * 0.09);
-        osc.stop(now + i * 0.09 + 0.36);
-      });
-    }
-
-    window.setTimeout(() => {
-      void ctx.close().catch(() => {});
-    }, 900);
-  } catch {
-    // Ignore audio restrictions
-  }
-}
-
 interface Stage4BasketballProps {
   onChallengeComplete?: () => void;
   onGoNextStage?: () => void;
@@ -157,7 +99,6 @@ export const Stage4Basketball: React.FC<Stage4BasketballProps> = ({
   const [phase, setPhase] = useState<'ready' | 'shooting' | 'scored' | 'finished'>('ready');
   const [shotsMade, setShotsMade] = useState(0);
   const [streak, setStreak] = useState(0);
-  const [soundOn, setSoundOn] = useState(true);
   const [ball, setBall] = useState<BallState>(START_BALL);
   const [swishSide, setSwishSide] = useState<'left' | 'right' | null>(null);
   const [clankSide, setClankSide] = useState<'left' | 'right' | null>(null);
@@ -225,17 +166,14 @@ export const Stage4Basketball: React.FC<Stage4BasketballProps> = ({
 
         if (roundIdx === SHOT_ROUNDS.length - 1) {
           setPhase('finished');
-          if (soundOn) playCourtSound('victory');
           onChallengeComplete?.();
         } else {
           setPhase('scored');
-          if (soundOn) playCourtSound('swish');
         }
       } else {
         setClankSide(side);
         setStreak(0);
         setFeedback({ type: 'error', msg: currentRound.wrongTip });
-        if (soundOn) playCourtSound('miss');
         window.setTimeout(() => {
           setBall(START_BALL);
           setPhase('ready');
@@ -440,22 +378,13 @@ export const Stage4Basketball: React.FC<Stage4BasketballProps> = ({
             不用通分，綜合運用三招聰明算比較左右兩個籃框上的分數，點擊<b>比較大</b>的籃框或按鈕出手投籃！
           </p>
         </div>
-        <div className="flex items-center gap-2">
-          <button
-            type="button"
-            onClick={() => setSoundOn((v) => !v)}
-            className="bg-slate-100 hover:bg-slate-200 active:scale-95 text-slate-700 font-bold px-3 py-2 rounded-xl text-xs sm:text-sm transition cursor-pointer whitespace-nowrap"
-          >
-            {soundOn ? '🔊 音效開' : '🔇 靜音'}
-          </button>
-          <button
-            type="button"
-            onClick={resetChallenge}
-            className="bg-slate-200 hover:bg-slate-300 active:scale-95 text-slate-800 font-bold px-3.5 py-2 rounded-xl text-xs sm:text-sm transition cursor-pointer whitespace-nowrap"
-          >
-            🔄 重新挑戰
-          </button>
-        </div>
+        <button
+          type="button"
+          onClick={resetChallenge}
+          className="bg-slate-200 hover:bg-slate-300 active:scale-95 text-slate-800 font-bold px-3.5 py-2 rounded-xl text-xs sm:text-sm transition cursor-pointer whitespace-nowrap"
+        >
+          🔄 重新挑戰
+        </button>
       </div>
 
       {/* 球場主舞台 */}
